@@ -107,6 +107,7 @@ class DataPipeline():
         data.reset_index(inplace=True)
         
         self.window_size = window_size
+        n_jobs = config.get_tsfresh_n_jobs()
         
         # Optimization: enable parallel processing with n_jobs from config
         data_windows = roll_time_series(
@@ -116,7 +117,7 @@ class DataPipeline():
             max_timeshift=window_size,
             min_timeshift=window_size,
             rolling_direction=skip_interval,
-            n_jobs=config.N_JOBS,
+            n_jobs=n_jobs,
         )   
             
         return data_windows
@@ -178,6 +179,8 @@ class DataPipeline():
         
         if data.index.names == ['component_id', 'timestamp']:
             data.reset_index(inplace=True)
+
+        n_jobs = config.get_tsfresh_n_jobs()
          
         #Create a unique id column since job_id and component_id combo is the unique one
         data['uid'] = data['job_id'].astype(str) + '_' + data['component_id'].astype(str)
@@ -191,7 +194,7 @@ class DataPipeline():
                 column_id=column_id,
                 column_sort=column_sort,
                 default_fc_parameters=EfficientFCParameters() if fe_config == 'efficient' else MinimalFCParameters(),
-                n_jobs=config.N_JOBS,
+                n_jobs=n_jobs,
             )
         else:
             self.logger.info("TSFRESH will use kind_to_fc_parameters")
@@ -201,7 +204,7 @@ class DataPipeline():
                 column_id=column_id,
                 column_sort=column_sort,
                 kind_to_fc_parameters=kind_to_fc_parameters,
-                n_jobs=config.N_JOBS,
+                n_jobs=n_jobs,
             )            
                                 
         data_fe.reset_index(inplace=True)
